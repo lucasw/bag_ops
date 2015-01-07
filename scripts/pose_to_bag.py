@@ -21,19 +21,18 @@ def pose_to_bag(file, topic):
     base_sec = rospy.Time.now().to_sec()
 
     for row in pose_data:
-        pose = Pose()
-        pose.position = Point(row[1], row[2], row[3])
-        pose.orientation = Quaternion(row[5], row[6], row[7], row[4])
-
-        # time
-        rel_sec = row[0]
-        bag_sec = rospy.Time.from_sec(base_sec+rel_sec)
-
-        # write
+        pose = _row_to_pose(row)
+        bag_sec = rospy.Time.from_sec(base_sec+row[0])
         bag.write(topic, pose, bag_sec)
 
     bag.close()
 
+def _row_to_pose(row):
+    pose = Pose()
+    pose.position = Point(row[1], row[2], row[3])
+    pose.orientation = Quaternion(row[5], row[6], row[7], row[4])
+
+    return pose
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''
