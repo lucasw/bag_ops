@@ -10,7 +10,13 @@ import rospy
 from geometry_msgs.msg import Pose, Point, Quaternion
 
 def pose_to_bag(file):
-    print 'pose_to_bag'
+    rospy.init_node("pose_to_bag")
+
+    full_name = os.path.realpath(file)
+    output_file = os.path.join(os.path.dirname(full_name),
+            os.path.splitext(os.path.basename(full_name))[0]+'.bag') 
+
+    print full_name, output_file
 
 
 if __name__ == '__main__':
