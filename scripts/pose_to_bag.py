@@ -9,12 +9,12 @@ import rosbag
 import rospy
 from geometry_msgs.msg import Pose, Point, Quaternion
 
-def pose_to_bag(file):
+def pose_to_bag(file, topic):
     rospy.init_node("pose_to_bag")
 
     full_name = os.path.realpath(file)
     output_file = os.path.join(os.path.dirname(full_name),
-            os.path.splitext(os.path.basename(full_name))[0]+'.bag') 
+            os.path.splitext(os.path.basename(full_name))[0]+'.bag')
     bag = rosbag.Bag(output_file, 'w')
 
     pose_data = np.loadtxt(full_name)
@@ -30,7 +30,7 @@ def pose_to_bag(file):
         bag_sec = rospy.Time.from_sec(base_sec+rel_sec)
 
         # write
-        bag.write('pose', pose, bag_sec)
+        bag.write(topic, pose, bag_sec)
 
     bag.close()
 
@@ -42,5 +42,8 @@ if __name__ == '__main__':
     parser.add_argument('file',
             type=str,
             help='file contains pose data')
+    parser.add_argument('topic',
+            type=str,
+            help='topic name to write to')
     args = parser.parse_args()
-    pose_to_bag(args.file)
+    pose_to_bag(args.file, args.topic)
