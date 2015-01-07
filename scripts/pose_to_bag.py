@@ -20,6 +20,11 @@ def pose_to_bag(file, topic):
     pose_data = np.loadtxt(full_name)
     base_sec = rospy.Time.now().to_sec()
 
+    try:
+        _check_data(pose_data)
+    except Exception as e:
+        raise e
+
     for row in pose_data:
         pose = _row_to_pose(row)
         bag_sec = rospy.Time.from_sec(base_sec+row[0])
@@ -33,6 +38,11 @@ def _row_to_pose(row):
     pose.orientation = Quaternion(row[5], row[6], row[7], row[4])
 
     return pose
+
+def _check_data(pose_data):
+    shape = pose_data.shape
+    if shape[1] != 7 and shape[1] != 8:
+        raise TypeError('The width of the array should be 7 or 8')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''
