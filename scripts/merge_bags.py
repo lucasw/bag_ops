@@ -8,20 +8,24 @@ import rospy
 def merge_bags(input_bags, merged_bag):
     rospy.init_node("merge_bags")
 
+    _check_bagfiles(input_bags)
+
+    output_file = os.path.join(os.getcwd(), merged_bag)
+
+    bag_objs = []
     for bag in input_bags:
-        try:
-            _check_bag_file(bag)
-        except Exception as e:
-            raise e
-    output_file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-            merged_bag)
+        bag_objs.append(rosbag.Bag(bag))
 
-    print "Merging", input_bags, "into", merged_bag 
+    print "Merging", input_bags, "into", output_file
+    output = rosbag.Bag(output_file, 'w')
+
+    output.close()
 
 
-def _check_bag_file(bag):
-    if not os.path.exists(bag):
-        raise ValueError("Files not exist")
+def _check_bagfiles(input_bags):
+    for bag in input_bags:
+        if not os.path.exists(bag):
+            raise ValueError("Files not exist")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''
@@ -30,7 +34,7 @@ if __name__ == '__main__':
     parser.add_argument('input_bags',
             type=str,
             nargs='*',
-            help='file contains pose data')
+            help='bag files list')
     parser.add_argument('--merged_bag',
             type=str,
             default='merged.bag',

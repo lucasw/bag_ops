@@ -65,7 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('--axies',
             type=str,
             default='',
-            help="""if use euler angle, specify the type 
+            help="""if use euler angle, specify the type
               Axes 4-string: e.g. 'sxyz' or 'ryxy'
               first character : rotations are applied to 's'tatic or 'r'otating frame
               remaining characters : successive rotation axis 'x', 'y', or 'z'
