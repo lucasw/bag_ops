@@ -31,8 +31,9 @@ def pose_to_bag(file, topic, axies):
 
     bag.close()
 
-# the order of transformation output: w x y z
-# the order of ROS: x y z w
+# for euler:
+#   the order of transformation output: w x y z
+#   the order of ROS: x y z w
 def _row_to_pose(row, axies):
     pose = Pose()
     pose.position = Point(row[1], row[2], row[3])
@@ -44,7 +45,7 @@ def _row_to_pose(row, axies):
         quat = tf.quaternion_from_euler(row[4], row[5], row[6], axies)
         pose.orientation = Quaternion(quat[1], quat[2], quat[3], quat[0])
     else:
-        raise TypeError('The lenght of the array should be 7 or 8')
+        raise TypeError('The length of the data should be 7 or 8')
     return pose
 
 def _check_data(pose_data):

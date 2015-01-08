@@ -58,7 +58,9 @@ def _write_merged_bag(input_bags, output, timestamps):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='''
-    merge multiple bag files. Require that each bag file contains only one topic.
+    merge multiple bag files.
+    Each bag file should contain only one topic.
+    All topics are of the same time length and time duration.
     ''')
     parser.add_argument('input_bags',
             type=str,
