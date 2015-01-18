@@ -52,7 +52,12 @@ def _write_merged_bag(input_bags, output, timestamps):
         i = iter(timestamps)
         try:
             for topic, msg, _, in bag.read_messages():
-                output.write(topic, msg, i.next())
+                t_stamp = i.next()
+                try:
+                    msg.header.stamp=t_stamp
+                except AttributeError:
+                    print topic, "does not have header."
+                output.write(topic, msg, t_stamp)
         except Exception as e:
             print e; raise e
 

@@ -7,7 +7,7 @@ import numpy as np
 import bag_ops.transformations as tf
 import rosbag
 import rospy
-from geometry_msgs.msg import Pose, Point, Quaternion
+from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 
 def pose_to_bag(file, topic, axies):
     rospy.init_node("pose_to_bag")
@@ -23,9 +23,13 @@ def pose_to_bag(file, topic, axies):
     try:
         _check_data(pose_data)
         for row in pose_data:
+            t_stamp = rospy.Time.from_sec(base_sec + row[0])
             pose = _row_to_pose(row, axies)
-            bag_sec = rospy.Time.from_sec(base_sec+row[0])
-            bag.write(topic, pose, bag_sec)
+            try:
+                pose.header.stamp = t_stamp
+            except AttributeError:
+                print "pose type does not have header."
+            bag.write(topic, pose, t_stamp)
     except Exception as e:
         raise e
 
@@ -35,18 +39,18 @@ def pose_to_bag(file, topic, axies):
 #   the order of transformation output: w x y z
 #   the order of ROS: x y z w
 def _row_to_pose(row, axies):
-    pose = Pose()
-    pose.position = Point(row[1], row[2], row[3])
+    pose_stamped = PoseStamped()
+    pose_stamped.pose.position = Point(row[1], row[2], row[3])
     if row.shape[0] == 8:
-        pose.orientation = Quaternion(row[4], row[5], row[6], row[7])
+        pose_stamped.pose.orientation = Quaternion(row[4], row[5], row[6], row[7])
     elif row.shape[0] == 7:
         if axies == '':
             raise ValueError('The type of euler should be specified')
         quat = tf.quaternion_from_euler(row[4], row[5], row[6], axies)
-        pose.orientation = Quaternion(quat[1], quat[2], quat[3], quat[0])
+        pose_stamped.pose.orientation = Quaternion(quat[1], quat[2], quat[3], quat[0])
     else:
         raise TypeError('The length of the data should be 7 or 8')
-    return pose
+    return pose_stamped
 
 def _check_data(pose_data):
     shape = pose_data.shape
