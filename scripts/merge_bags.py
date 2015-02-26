@@ -6,8 +6,6 @@ import rosbag
 import rospy
 
 def merge_bags(input_bags, merged_bag):
-    rospy.init_node("merge_bags")
-
     _check_bagfiles(input_bags)
 
     output_file = os.path.join(os.getcwd(), merged_bag)
