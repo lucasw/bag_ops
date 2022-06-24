@@ -1,78 +1,60 @@
 #!/usr/bin/env python
-import os
+# from https://www.clearpathrobotics.com/assets/downloads/support/merge_bag.py
+
 import argparse
+from fnmatch import fnmatchcase
 
-import rosbag
-import rospy
+from rosbag import Bag
 
-def merge_bags(input_bags, merged_bag):
-    _check_bagfiles(input_bags)
 
-    output_file = os.path.join(os.getcwd(), merged_bag)
-    output = rosbag.Bag(output_file, 'w')
-    print "Merging", input_bags, "into", output_file
+def main():
 
-    print "Using the timestamps of the first bag file"
-    timestamps = _extract_timestamps(input_bags[0])
+    parser = argparse.ArgumentParser(description='Merge one or more bag files with the possibilities of filtering topics.')
+    parser.add_argument('outputbag',
+                        help='output bag file with topics merged')
+    parser.add_argument('inputbag', nargs='+',
+                        help='input bag files')
+    parser.add_argument('-v', '--verbose', action="store_true", default=False,
+                        help='verbose output')
+    parser.add_argument('-t', '--topics', default="*",
+                        help='string interpreted as a list of topics (wildcards \'*\' and \'?\' allowed) to include in the merged bag file')
 
-    print "Writing merged bag file"
-    _write_merged_bag(input_bags, output, timestamps)
-
-    output.close()
-
-def _check_bagfiles(input_bags):
-    for bag_file in input_bags:
-        if not os.path.exists(bag_file):
-            raise ValueError("files not exist")
-    bag_objs = []
-    for bag in input_bags:
-        bag_objs.append(rosbag.Bag(bag))
-    for bag in bag_objs:
-        if len(bag.get_type_and_topic_info().topics.keys()) != 1:
-            raise ValueError("each bag file should contain only one topic")
-    if not all(bag.get_message_count() == bag_objs[0].get_message_count() \
-            for bag in bag_objs):
-        raise ValueError("topics should contain the same number of messages")
-    time_cal = lambda b: b.get_end_time()-b.get_start_time()
-    if not all(time_cal(bag) == time_cal(bag_objs[0]) for bag in bag_objs):
-        raise ValueError("topics should last for the same time length")
-
-def _extract_timestamps(input_bag):
-    timestamps = []
-    bag = rosbag.Bag(input_bag)
-    for _, _, time in bag.read_messages():
-        timestamps.append(time)
-    return timestamps
-
-def _write_merged_bag(input_bags, output, timestamps):
-    for bagfile in input_bags:
-        bag = rosbag.Bag(bagfile)
-        i = iter(timestamps)
-        try:
-            for topic, msg, _, in bag.read_messages():
-                t_stamp = i.next()
-                try:
-                    msg.header.stamp=t_stamp
-                except AttributeError:
-                    print topic, "does not have header."
-                output.write(topic, msg, t_stamp)
-        except Exception as e:
-            print e; raise e
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='''
-    merge multiple bag files.
-    Each bag file should contain only one topic.
-    All topics are of the same time length and time duration.
-    ''')
-    parser.add_argument('input_bags',
-            type=str,
-            nargs='*',
-            help='bag files list')
-    parser.add_argument('--merged_bag',
-            type=str,
-            default='merged.bag',
-            help="name of merged bag file"
-            )
     args = parser.parse_args()
-    merge_bags(args.input_bags, args.merged_bag)
+
+    topics = args.topics.split(' ')
+
+    total_included_count = 0
+    total_skipped_count = 0
+
+    if (args.verbose):
+        print("Writing bag file: " + args.outputbag)
+        print("Matching topics against patters: '%s'" % ' '.join(topics))
+
+    with Bag(args.outputbag, 'w') as o:
+        for ifile in args.inputbag:
+            matchedtopics = []
+            included_count = 0
+            skipped_count = 0
+            if (args.verbose):
+                print("> Reading bag file: " + ifile)
+            with Bag(ifile, 'r') as ib:
+                for topic, msg, t in ib:
+                    if any(fnmatchcase(topic, pattern) for pattern in topics):
+                        if not topic in matchedtopics:
+                            matchedtopics.append(topic)
+                            if (args.verbose):
+                                print("Including matched topic '%s'" % topic)
+                        o.write(topic, msg, t)
+                        included_count += 1
+                    else:
+                        skipped_count += 1
+            total_included_count += included_count
+            total_skipped_count += skipped_count
+            if (args.verbose):
+                print("< Included %d messages and skipped %d" % (included_count, skipped_count))
+
+    if (args.verbose):
+        print("Total: Included %d messages and skipped %d" % (total_included_count, total_skipped_count))
+
+if __name__ == "__main__":
+    main()
