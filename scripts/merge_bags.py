@@ -56,6 +56,14 @@ def main():
             if (args.verbose):
                 print("> Reading bag file: " + ifile)
             with Bag(ifile, 'r') as ib:
+                bag_start = ib.get_start_time()
+                bag_end = ib.get_end_time()
+                if t_start is not None and bag_end < t_start:
+                    print(f"bag end {bag_end} < t_start {t_start}, skipping")
+                    continue
+                if t_end is not None and bag_start > t_end:
+                    print(f"bag start {bag_start} > t_end {t_end}, skipping")
+                    continue
                 for topic, msg, t in ib:
                     if t_start is not None and t.to_sec() < float(t_start):
                         continue
@@ -66,7 +74,7 @@ def main():
                     if any(fnmatchcase(topic, pattern) for pattern in topics):
                         if topic not in matchedtopics:
                             matchedtopics.append(topic)
-                            if (args.verbose):
+                            if False:  # if (args.verbose):
                                 print("Including matched topic '%s'" % topic)
                         o.write(topic, msg, t)
                         included_count += 1
