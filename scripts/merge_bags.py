@@ -14,14 +14,30 @@ def main():
                         help='output bag file with topics merged')
     parser.add_argument('inputbag', nargs='+',
                         help='input bag files')
-    parser.add_argument('-v', '--verbose', action="store_true", default=False,
+    parser.add_argument('-v', '--verbose', action="store_true", default=True,
                         help='verbose output')
     help_text = 'string interpreted as a list of topics (wildcards \'*\' and \'?\' allowed'
     help_text += 'to include in the merged bag file'
     parser.add_argument('-t', '--topics', default="*",
                         help=help_text)
+    parser.add_argument('-t0', '--t_start', default=None,
+                        help="don't output any message before this time")
+    parser.add_argument('-t1', '--t_end', default=None,
+                        help="don't output any messages after this time")
 
     args = parser.parse_args()
+
+    if args.t_start is not None:
+        t_start = float(args.t_start)
+    else:
+        t_start = None
+
+    if args.t_end is not None:
+        t_end = float(args.t_end)
+    else:
+        t_end = None
+
+    print(f"start time: {t_start}, stop time: {t_end}")
 
     topics = args.topics.split(' ')
 
@@ -41,6 +57,12 @@ def main():
                 print("> Reading bag file: " + ifile)
             with Bag(ifile, 'r') as ib:
                 for topic, msg, t in ib:
+                    if t_start is not None and t.to_sec() < float(t_start):
+                        continue
+                    if t_end is not None and t.to_sec() > float(t_end):
+                        if (args.verbose):
+                            print(f"done early with t_end {t_end}")
+                        break
                     if any(fnmatchcase(topic, pattern) for pattern in topics):
                         if topic not in matchedtopics:
                             matchedtopics.append(topic)
