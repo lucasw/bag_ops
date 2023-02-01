@@ -65,8 +65,17 @@ def main():
                     print(f"bag start {bag_start} > t_end {t_end}, skipping")
                     continue
                 for topic, msg, t in ib:
-                    if t_start is not None and t.to_sec() < float(t_start):
-                        continue
+                    if t_start is not None:
+                        if "tf_static" in topic:
+                            # need to overwrite t otherwise the bag becomes too long,
+                            # there'll be an early tf_static and a long blank period
+                            t.secs = int(t_start)
+                            t.nsecs = 0
+                            # for ind in range(len(msg.transforms)):
+                            #     msg.transforms[ind].header.stamp.secs = int(t_start)  # 0
+                            #     msg.transforms[ind].header.stamp.nsecs = 0
+                        elif t.to_sec() < float(t_start):
+                            continue
                     if t_end is not None and t.to_sec() > float(t_end):
                         if (args.verbose):
                             print(f"done early with t_end {t_end}")
