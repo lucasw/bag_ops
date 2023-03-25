@@ -45,7 +45,7 @@ base_frame = "base"
 frames = {}
 
 # TODO(lucasw) get duration from input_bag
-duration = 2000.0
+duration = 8000.0
 buffer_core = tf2_ros.BufferCore(rospy.Duration(duration))
 count = 0
 with rosbag.Bag(input_bag) as bag:
@@ -108,6 +108,10 @@ with rosbag.Bag(output_bag, "w") as outbag:
             # TODO(lucasw) write every message as a TransformStamped for now, later use the input topic type
             # though it is convenient to put all the topics together in one message, easier
             # to iterate through downstream
-            tf = buffer_core.lookup_transform_core(base_frame, frame, stamp)
+            try:
+                tf = buffer_core.lookup_transform_core(base_frame, frame, stamp)
+            except Exception as ex:
+                rospy.logwarn(ex)
+                continue
             tfm.transforms.append(tf)
         outbag.write("sync_topics_tf", tfm, stamp)
