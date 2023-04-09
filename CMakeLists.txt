@@ -6,6 +6,8 @@ project(bag_ops)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  rosbag_storage
+  roscpp
   rospy
   std_msgs
 )
@@ -103,16 +105,16 @@ include_directories(
 # )
 
 ## Declare a cpp executable
-# add_executable(bag_ops_node src/bag_ops_node.cpp)
+add_executable(bag_player src/bag_player)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(bag_ops_node bag_ops_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(bag_ops_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(bag_player
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -129,11 +131,11 @@ include_directories(
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS bag_ops bag_ops_node
-#   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS bag_player
+  ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark cpp header files for installation
 # install(DIRECTORY include/${PROJECT_NAME}/
