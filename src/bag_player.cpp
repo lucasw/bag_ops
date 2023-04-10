@@ -8,14 +8,19 @@
 #include <rosbag/bag.h>
 
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
   ros::init(argc, argv, "bag_player");
 
   ros::NodeHandle nh("~");
   std::string bag_name = "";
   nh.getParam("bag", bag_name);
-  ROS_INFO_STREAM(bag_name);
+  ROS_INFO_STREAM("opening bag: '" << bag_name << "'");
+
+  rosbag::Bag bag;
+  bag.open(bag_name, rosbag::bagmode::Read);
+
+  bag.close();
 
   ros::spin();
   return 0;
