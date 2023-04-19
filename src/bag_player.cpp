@@ -1,4 +1,5 @@
 /**
+ * Copyright 2023 Lucas Walter
  * play back a bag using rosbag_storage bag.h and have ability to change
  * playback rate as well as play backwards, and skip any amount forward or backward
  * in the bag
@@ -6,6 +7,7 @@
 
 #include <ros/ros.h>
 #include <rosbag/bag.h>
+#include <string>
 
 
 int main(int argc, char *argv[])
