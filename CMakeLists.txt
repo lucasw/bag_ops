@@ -11,7 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 set(ROSLINT_PYTHON_OPTS "--ignore=W503,E203" "1>&2")
-roslint_python()
+roslint_python(scripts)
 
 set(ROSLINT_CPP_OPTS
   "--extensions=cpp,h,hpp" "--filter=-whitespace/braces,-runtime/references,-build/c++11"
