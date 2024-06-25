@@ -20,6 +20,7 @@ def main():
     help_text += 'to include in the merged bag file'
     parser.add_argument('-t', '--topics', default="*",
                         help=help_text)
+    parser.add_argument('-c', '--compression', default="bz2", help="none, lz4, or bz2")
     parser.add_argument('-t0', '--t_start', default=None,
                         help="don't output any message before this time")
     parser.add_argument('-t1', '--t_end', default=None,
@@ -48,9 +49,9 @@ def main():
         print("Writing bag file: " + args.outputbag)
         print("Matching topics against patters: '%s'" % ' '.join(topics))
 
-    # TODO(lucasw) make optional
-    compression = "lz4"
-    with Bag(args.outputbag, 'w', compression=compression) as o:
+    print(f"using compression '{args.compression}'")
+
+    with Bag(args.outputbag, 'w', compression=args.compression) as o:
         for ifile in args.inputbag:
             matchedtopics = []
             included_count = 0
