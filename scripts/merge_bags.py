@@ -48,7 +48,9 @@ def main():
         print("Writing bag file: " + args.outputbag)
         print("Matching topics against patters: '%s'" % ' '.join(topics))
 
-    with Bag(args.outputbag, 'w') as o:
+    # TODO(lucasw) make optional
+    compression = "lz4"
+    with Bag(args.outputbag, 'w', compression=compression) as o:
         for ifile in args.inputbag:
             matchedtopics = []
             included_count = 0
