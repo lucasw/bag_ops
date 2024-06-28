@@ -67,16 +67,14 @@ def main():
                 if t_end is not None and bag_start > t_end:
                     print(f"bag start {bag_start} > t_end {t_end}, skipping")
                     continue
-                for topic, msg, t in ib:
+                # msg_raw is a tuple of (datatype, (data, md5sum, position), pytype)
+                for topic, msg_raw, t in ib.read_messages(raw=True):
                     if t_start is not None:
                         if "tf_static" in topic:
                             # need to overwrite t otherwise the bag becomes too long,
                             # there'll be an early tf_static and a long blank period
                             t.secs = int(t_start)
                             t.nsecs = 0
-                            # for ind in range(len(msg.transforms)):
-                            #     msg.transforms[ind].header.stamp.secs = int(t_start)  # 0
-                            #     msg.transforms[ind].header.stamp.nsecs = 0
                         elif t.to_sec() < float(t_start):
                             continue
                     if t_end is not None and t.to_sec() > float(t_end):
@@ -88,7 +86,7 @@ def main():
                             matchedtopics.append(topic)
                             if False:  # if (args.verbose):
                                 print("Including matched topic '%s'" % topic)
-                        o.write(topic, msg, t)
+                        o.write(topic, msg_raw, t, raw=True)
                         included_count += 1
                     else:
                         skipped_count += 1
