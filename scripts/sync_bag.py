@@ -77,7 +77,7 @@ with rosbag.Bag(input_bag) as bag:
                 frames[frame] = True
             except AttributeError as ex:
                 print(topic_info[topic].msg_type)
-                raise(ex)
+                raise (ex)
             if count % 2000 == 0:
                 print(f"{count}")
             count += 1
